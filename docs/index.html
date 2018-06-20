@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>toy_coupletbot</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  </head>
+  <body>
+    <div>
+      server: <input type="text" id="server" />
+    </div>
+    <div id="messages">
+      messages:<br/>
+    </div>
+    <div>
+      <input type="text" id="content" onkeypress="if (event.keyCode === 13) { say() }" />
+      <input type="submit" value="ok" onclick="say()" />
+    </div>
+    <script type="text/javascript">
+      function say() {
+        let content = document.getElementById('content').value
+        document.getElementById('content').value = ""
+        document.getElementById("messages").innerHTML += "上联 " + content + "<br/>"
+        let url = encodeURI(document.getElementById('server').value + "/coupletbot/say?content=" + content)
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.onload = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              document.getElementById("messages").innerHTML += "下联 " + xhr.responseText + "<br/><br/>"
+            }
+          }
+        }
+        xhr.onerror = function() {
+          document.getElementById("messages").innerHTML += "ERROR: Failed to call " + "<a href=" + url + ">" + url + "</a>" + "<br/>"
+        }
+        xhr.send(null);
+      }
+
+      function get_param(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+          return unescape(r[2]);
+        }
+        return null;
+      }
+
+      let server = get_param("server")
+      if (server) {
+        document.getElementById('server').value = server
+      } else {
+        document.getElementById('server').value = "http://localhost"
+      }
+    </script>
+  </body>
+</html>
